@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Neuropsychologie - P'tite Crevette</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --bg: #F7F7F7;
+            --text: #2C3E50;
+            --card: #FFFFFF;
+            --success: #4ECDC4;
+            --error: #FF6B6B;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 12px 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .logo svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        h1 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            width: 250px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .category-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .category-option input {
+            margin-right: 10px;
+        }
+
+        .dropdown-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .validate-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .selected-categories {
+            background: white;
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .selected-categories.show {
+            display: flex;
+        }
+
+        .category-tag {
+            background: var(--primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .options {
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+        }
+
+        .option.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .option.correct {
+            background: var(--success);
+            color: white;
+        }
+
+        .option.incorrect {
+            background: var(--error);
+            color: white;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--primary), #ff8e8e);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .nav-btn:disabled {
+            background: #b0b0b0;
+            cursor: not-allowed;
+        }
+
+        .score-container {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .daily-info {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C10.5 2 9 3 9 4C9 5 10.5 6 12 6C13.5 6 15 5 15 4C15 3 13.5 2 12 2ZM18 4C16.5 4 15 5 15 6C15 7 16.5 8 18 8C19.5 8 21 7 21 6C21 5 19.5 4 18 4ZM6 4C7.5 4 9 5 9 6C9 7 7.5 8 6 8C4.5 8 3 7 3 6C3 5 4.5 4 6 4ZM18 10C16.5 10 15 11 15 12C15 13 16.5 14 18 14C19.5 14 21 13 21 12C21 11 19.5 10 18 10ZM12 10C10.5 10 9 11 9 12C9 13 10.5 14 12 14C13.5 14 15 13 15 12C15 11 13.5 10 12 10ZM6 10C7.5 10 9 11 9 12C9 13 7.5 14 6 14C4.5 14 3 13 3 12C3 11 4.5 10 6 10ZM18 16C16.5 16 15 17 15 18C15 19 16.5 20 18 20C19.5 20 21 19 21 18C21 17 19.5 16 18 16ZM12 16C10.5 16 9 17 9 18C9 19 10.5 20 12 20C13.5 20 15 19 15 18C15 17 13.5 16 12 16Z" fill="white"/>
+            </svg>
+            <span>P'tite Crevette</span>
+        </div>
+        <h1>Quiz Neuropsychologie</h1>
+        <p>Niveau Master - Cognition et Cerveau</p>
+    </header>
+
+    <div class="controls">
+        <button class="btn active" id="full-mode-btn">Quiz complet</button>
+        <button class="btn" id="daily-mode-btn">Quiz quotidien</button>
+        <div class="dropdown">
+            <button class="btn" id="category-btn">Catégories</button>
+            <div class="dropdown-content" id="category-dropdown">
+                <div class="category-option">
+                    <input type="checkbox" id="all" checked>
+                    <label for="all">Toutes les catégories</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="neuroanatomie">
+                    <label for="neuroanatomie">Neuroanatomie (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="neurotransmetteurs">
+                    <label for="neurotransmetteurs">Neurotransmetteurs (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="memoire">
+                    <label for="memoire">Mémoire (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="langage">
+                    <label for="langage">Langage (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="fonctions_executives">
+                    <label for="fonctions_executives">Fonctions exécutives (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="attention">
+                    <label for="attention">Attention (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="pathologies">
+                    <label for="pathologies">Pathologies (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="troubles_psychiatriques">
+                    <label for="troubles_psychiatriques">Troubles psychiatriques (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="neurodeveloppement">
+                    <label for="neurodeveloppement">Neurodéveloppement (20)</label>
+                </div>
+                <div class="category-option">
+                    <input type="checkbox" id="neuroimagerie">
+                    <label for="neuroimagerie">Neuroimagerie (20)</label>
+                </div>
+                <div class="dropdown-footer">
+                    <button class="validate-btn" id="validate-categories">Valider</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="selected-categories" id="selected-categories">
+        <span>Sélection : </span>
+    </div>
+
+    <div class="daily-info" id="daily-info">
+        Quiz du jour : 10 questions aléatoires
+    </div>
+
+    <div class="quiz-container">
+        <div class="question" id="question">Choisis un mode ou une catégorie pour commencer !</div>
+        <div class="options" id="options"></div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn" disabled>Précédent</button>
+        <button class="nav-btn" id="next-btn">Suivant</button>
+    </div>
+
+    <div class="score-container" id="score-container">
+        <div>Score : <span id="score">0</span>/<span id="score-max">10</span></div>
+        <div id="score-message"></div>
+        <button class="nav-btn" id="restart-btn" style="display: none; margin-top: 15px;">Recommencer</button>
+    </div>
+
+    <script>
+        // Fonction pour générer les questions par catégorie
+        function generateQuestions() {
+            const categories = {
+                neuroanatomie: [
+                    { question: "Quel lobe cérébral est principalement impliqué dans le traitement des informations visuelles ?", options: ["Lobe frontal", "Lobe temporal", "Lobe pariétal", "Lobe occipital"], correct: 3 },
+                    { question: "Quel est le rôle principal du corps calleux ?", options: ["Transmettre les informations entre les deux hémisphères", "Réguler la température corporelle", "Contrôler la respiration", "Produire des hormones"], correct: 0 },
+                    { question: "Quelle structure cérébrale est impliquée dans la régulation des émotions comme la peur ?", options: ["Hippocampe", "Amygdale", "Thalamus", "Cervelet"], correct: 1 },
+                    { question: "Quel est le rôle principal du cervelet ?", options: ["Régulation des émotions", "Contrôle moteur et coordination", "Mémoire à long terme", "Traitement du langage"], correct: 1 },
+                    { question: "Quelle structure est souvent appelée le 'relais sensoriel' du cerveau ?", options: ["Hypothalamus", "Thalamus", "Noyau accumbens", "Cortex préfrontal"], correct: 1 },
+                    { question: "Quel lobe est principalement impliqué dans le traitement du langage ?", options: ["Lobe occipital", "Lobe temporal", "Lobe frontal", "Lobe pariétal"], correct: 1 },
+                    { question: "Quelle structure est essentielle pour la formation de nouveaux souvenirs ?", options: ["Cervelet", "Hippocampe", "Amygdale", "Cortex visuel"], correct: 1 },
+                    { question: "Quel est le rôle principal du cortex préfrontal ?", options: ["Traitement visuel", "Fonctions exécutives", "Mémoire à long terme", "Contrôle moteur"], correct: 1 },
+                    { question: "Quelle structure est impliquée dans la régulation du cycle veille-sommeil ?", options: ["Hypothalamus", "Cervelet", "Cortex auditif", "Gyrus cingulaire"], correct: 0 },
+                    { question: "Quel est le rôle du noyau accumbens ?", options: ["Régulation de la température", "Traitement de la récompense", "Contrôle moteur fin", "Mémoire procédurale"], correct: 1 },
+                    { question: "Quelle structure cérébrale est impliquée dans la détection des conflits ?", options: ["Cervelet", "Cortex cingulaire antérieur", "Hippocampe", "Amygdale"], correct: 1 },
+                    { question: "Quel est le rôle principal du gyrus cingulaire ?", options: ["Régulation des émotions et de la motivation", "Contrôle moteur", "Mémoire à long terme", "Traitement du langage"], correct: 0 },
+                    { question: "Quelle structure est impliquée dans la régulation de la faim et de la soif ?", options: ["Cervelet", "Hypothalamus", "Thalamus", "Cortex préfrontal"], correct: 1 },
+                    { question: "Quel lobe est principalement impliqué dans la planification et la prise de décision ?", options: ["Lobe occipital", "Lobe temporal", "Lobe frontal", "Lobe pariétal"], correct: 2 },
+                    { question: "Quelle structure est impliquée dans la coordination des mouvements oculaires ?", options: ["Cervelet", "Colliculus supérieur", "Hippocampe", "Amygdale"], correct: 1 },
+                    { question: "Quel est le rôle principal du tronc cérébral ?", options: ["Traitement des émotions", "Contrôle des fonctions vitales", "Mémoire à long terme", "Traitement du langage"], correct: 1 },
+                    { question: "Quelle structure relie l'hippocampe au reste du cerveau ?", options: ["Corps calleux", "Fornix", "Thalamus", "Cervelet"], correct: 1 },
+                    { question: "Quel lobe est impliqué dans le traitement des informations auditives ?", options: ["Lobe frontal", "Lobe temporal", "Lobe pariétal", "Lobe occipital"], correct: 1 },
+                    { question: "Quelle structure est impliquée dans la régulation de la température corporelle ?", options: ["Cervelet", "Hypothalamus", "Thalamus", "Cortex préfrontal"], correct: 1 },
+                    { question: "Quel est le rôle du cortex somatosensoriel ?", options: ["Traitement visuel", "Traitement des informations tactiles", "Mémoire à long terme", "Traitement du langage"], correct: 1 }
+                ],
+                neurotransmetteurs: [
+                    { question: "Quel neurotransmetteur est principalement impliqué dans la régulation de l'humeur ?", options: ["Dopamine", "Sérotonine", "Acétylcholine", "GABA"], correct: 1 },
+                    { question: "Quel est le principal neurotransmetteur excitateurs du système nerveux central ?", options: ["GABA", "Glutamate", "Dopamine", "Sérotonine"], correct: 1 },
+                    { question: "Quel neurotransmetteur est principalement impliqué dans le système de récompense ?", options: ["Sérotonine", "GABA", "Dopamine", "Acétylcholine"], correct: 2 },
+                    { question: "Quel est le principal neurotransmetteur inhibiteur du système nerveux central ?", options: ["Glutamate", "Dopamine", "GABA", "Acétylcholine"], correct: 2 },
+                    { question: "Quel neurotransmetteur est impliqué dans la contraction musculaire ?", options: ["Dopamine", "Sérotonine", "Acétylcholine", "GABA"], correct: 2 },
+                    { question: "Quel neurotransmetteur est associé à la maladie de Parkinson ?", options: ["Sérotonine", "Dopamine", "GABA", "Glutamate"], correct: 1 },
+                    { question: "Quel neurotransmetteur est ciblé par les antidépresseurs ISRS ?", options: ["Dopamine", "Sérotonine", "Noradrénaline", "GABA"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation de la vigilance ?", options: ["Dopamine", "Noradrénaline", "Sérotonine", "GABA"], correct: 1 },
+                    { question: "Quel neurotransmetteur est associé au syndrome de Gilles de la Tourette ?", options: ["Sérotonine", "Dopamine", "GABA", "Acétylcholine"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation de l'appétit ?", options: ["Dopamine", "Sérotonine", "Neuropeptide Y", "Acétylcholine"], correct: 2 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation du sommeil ?", options: ["Dopamine", "Histamine", "Sérotonine", "GABA"], correct: 1 },
+                    { question: "Quel neurotransmetteur est associé à la schizophrénie ?", options: ["Sérotonine", "Dopamine", "GABA", "Glutamate"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans la mémoire et l'apprentissage ?", options: ["Dopamine", "Acétylcholine", "GABA", "Glutamate"], correct: 3 },
+                    { question: "Quel neurotransmetteur est ciblé par les benzodiazépines ?", options: ["Glutamate", "Dopamine", "GABA", "Acétylcholine"], correct: 2 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation de la douleur ?", options: ["Dopamine", "Endorphines", "Sérotonine", "GABA"], correct: 1 },
+                    { question: "Quel neurotransmetteur est associé à la maladie de Huntington ?", options: ["Dopamine", "GABA", "Glutamate", "Sérotonine"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation de l'anxiété ?", options: ["Dopamine", "GABA", "Glutamate", "Sérotonine"], correct: 1 },
+                    { question: "Quel neurotransmetteur est associé à la dépendance aux drogues ?", options: ["Sérotonine", "Dopamine", "GABA", "Acétylcholine"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation de la pression artérielle ?", options: ["Dopamine", "Noradrénaline", "Sérotonine", "GABA"], correct: 1 },
+                    { question: "Quel neurotransmetteur est associé à la maladie d'Alzheimer ?", options: ["Dopamine", "Acétylcholine", "GABA", "Glutamate"], correct: 1 }
+                ],
+                memoire: [
+                    { question: "Quel type de mémoire est principalement affecté dans l'amnésie antérograde ?", options: ["Mémoire procédurale", "Mémoire sémantique", "Mémoire épisodique", "Mémoire de travail"], correct: 2 },
+                    { question: "Quel est le rôle principal de l'hippocampe dans la cognition ?", options: ["Régulation des émotions", "Mémoire à long terme", "Contrôle moteur", "Traitement du langage"], correct: 1 },
+                    { question: "Quel test évalue la mémoire visuo-spatiale ?", options: ["Test de Stroop", "Test de Rey-Osterrieth", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 1 },
+                    { question: "Quel type de mémoire est principalement affecté dans la maladie d'Alzheimer aux stades précoces ?", options: ["Mémoire procédurale", "Mémoire sémantique", "Mémoire épisodique", "Mémoire de travail"], correct: 2 },
+                    { question: "Quel test évalue la mémoire de travail visuo-spatiale ?", options: ["Test de Corsi", "Test de Rey-Osterrieth", "Test de Stroop", "Test de la Tour de Londres"], correct: 0 },
+                    { question: "Quel type de mémoire est principalement affecté dans l'amnésie rétrograde ?", options: ["Mémoire procédurale", "Mémoire sémantique", "Mémoire épisodique", "Mémoire de travail"], correct: 2 },
+                    { question: "Quel est le rôle du cortex entorhinal dans la mémoire ?", options: ["Traitement des émotions", "Interface entre le cortex et l'hippocampe", "Contrôle moteur", "Traitement du langage"], correct: 1 },
+                    { question: "Quel test évalue la mémoire verbale ?", options: ["Test de Rey-Osterrieth", "Test des 5 mots de Dubois", "Test de la Tour de Londres", "Test de Stroop"], correct: 1 },
+                    { question: "Quelle protéine est associée à la maladie d'Alzheimer ?", options: ["Alpha-synucléine", "Protéine Tau", "Bêta-amyloïde", "Prion"], correct: 2 },
+                    { question: "Quel est le rôle principal du cortex préfrontal dans la mémoire ?", options: ["Mémoire à long terme", "Mémoire de travail", "Mémoire procédurale", "Mémoire sémantique"], correct: 1 },
+                    { question: "Quel type de mémoire est impliqué dans l'apprentissage des compétences motrices ?", options: ["Mémoire épisodique", "Mémoire sémantique", "Mémoire procédurale", "Mémoire de travail"], correct: 2 },
+                    { question: "Quel test évalue la mémoire sémantique ?", options: ["Test de fluence verbale", "Test de Rey-Osterrieth", "Test de la Tour de Londres", "Test de Stroop"], correct: 0 },
+                    { question: "Quel est le rôle des ganglions de la base dans la mémoire ?", options: ["Mémoire épisodique", "Mémoire procédurale", "Mémoire sémantique", "Mémoire de travail"], correct: 1 },
+                    { question: "Quel type de mémoire est affecté dans le syndrome de Korsakoff ?", options: ["Mémoire procédurale", "Mémoire sémantique", "Mémoire épisodique", "Mémoire de travail"], correct: 2 },
+                    { question: "Quel est le rôle du thalamus dans la mémoire ?", options: ["Relais sensoriel", "Consolidation de la mémoire", "Traitement des émotions", "Contrôle moteur"], correct: 1 },
+                    { question: "Quel test évalue la mémoire à court terme ?", options: ["Test de Corsi", "Test de span de chiffres", "Test de Rey-Osterrieth", "Test de Stroop"], correct: 1 },
+                    { question: "Quel est le rôle de l'amygdale dans la mémoire ?", options: ["Mémoire des émotions", "Mémoire visuelle", "Mémoire auditive", "Mémoire procédurale"], correct: 0 },
+                    { question: "Quel type de mémoire est impliqué dans la reconnaissance des visages ?", options: ["Mémoire épisodique", "Mémoire sémantique", "Mémoire procédurale", "Mémoire de travail"], correct: 1 },
+                    { question: "Quel est le rôle du cortex pariétal dans la mémoire ?", options: ["Mémoire visuelle", "Mémoire spatiale", "Mémoire auditive", "Mémoire des émotions"], correct: 1 }
+                ],
+                langage: [
+                    { question: "La dysphasie de Broca est associée à une lésion dans quelle région du cerveau ?", options: ["Aire de Wernicke", "Aire de Broca", "Cortex visuel", "Cervelet"], correct: 1 },
+                    { question: "Quel syndrome est caractérisé par une incapacité à comprendre le langage écrit ou oral ?", options: ["Aphasie de Wernicke", "Aphasie de Broca", "Apraxie", "Agnosie"], correct: 0 },
+                    { question: "Quel test est utilisé pour évaluer l'aphasie ?", options: ["Test de Stroop", "Test de Boston (BDAE)", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 1 },
+                    { question: "Quelle aphasie est associée à une production de langage fluente mais incohérente ?", options: ["Aphasie de Broca", "Aphasie de Wernicke", "Aphasie de conduction", "Aphasie globale"], correct: 1 },
+                    { question: "Quel est le rôle de l'aire de Broca ?", options: ["Compréhension du langage", "Production du langage", "Mémoire verbale", "Traitement visuel"], correct: 1 },
+                    { question: "Quel test évalue la fluence verbale ?", options: ["Test de Stroop", "Test de fluence verbale (COWAT)", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quelle aphasie est associée à une lésion du lobe pariétal ?", options: ["Aphasie de Broca", "Aphasie de Wernicke", "Aphasie de conduction", "Aphasie globale"], correct: 2 },
+                    { question: "Quel est le rôle de l'aire de Wernicke ?", options: ["Production du langage", "Compréhension du langage", "Mémoire auditive", "Traitement visuel"], correct: 1 },
+                    { question: "Quel trouble du langage est caractérisé par une répétition involontaire de mots ?", options: ["Aphasie", "Dysarthrie", "Écholalie", "Apraxie"], correct: 2 },
+                    { question: "Quel test évalue la compréhension auditive ?", options: ["Test de Stroop", "Token Test", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quelle structure cérébrale est impliquée dans la production du langage ?", options: ["Aire de Wernicke", "Aire de Broca", "Cortex auditif", "Cervelet"], correct: 1 },
+                    { question: "Quel trouble du langage est caractérisé par une difficulté à articuler les mots ?", options: ["Aphasie", "Dysarthrie", "Écholalie", "Apraxie"], correct: 1 },
+                    { question: "Quel est le rôle du fascicule arqué ?", options: ["Relier l'aire de Broca et l'aire de Wernicke", "Contrôler les mouvements oculaires", "Réguler les émotions", "Traiter les informations visuelles"], correct: 0 },
+                    { question: "Quel test évalue la capacité à nommer des objets ?", options: ["Test de Stroop", "Test de dénomination de Boston (BNT)", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quelle aphasie est associée à une lésion du lobe frontal ?", options: ["Aphasie de Wernicke", "Aphasie de Broca", "Aphasie de conduction", "Aphasie globale"], correct: 1 },
+                    { question: "Quel trouble du langage est caractérisé par une difficulté à comprendre les mots écrits ?", options: ["Dysarthrie", "Dyslexie", "Aphasie", "Apraxie"], correct: 1 },
+                    { question: "Quel est le rôle du cortex temporal supérieur ?", options: ["Traitement visuel", "Traitement auditif", "Contrôle moteur", "Régulation des émotions"], correct: 1 },
+                    { question: "Quel test évalue la capacité à répéter des phrases ?", options: ["Test de Stroop", "Test de répétition de phrases", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quelle structure cérébrale est impliquée dans la compréhension de la prosodie ?", options: ["Hémisphère droit", "Hémisphère gauche", "Cervelet", "Ganglions de la base"], correct: 0 },
+                    { question: "Quel trouble du langage est caractérisé par une difficulté à écrire ?", options: ["Dysarthrie", "Dysgraphie", "Aphasie", "Apraxie"], correct: 1 }
+                ],
+                fonctions_executives: [
+                    { question: "Quel test neuropsychologique est couramment utilisé pour évaluer les fonctions exécutives ?", options: ["Test de Stroop", "Test de Rey-Osterrieth", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 2 },
+                    { question: "Quel test évalue la flexibilité cognitive ?", options: ["Test de Stroop", "Test du Wisconsin Card Sorting (WCST)", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 1 },
+                    { question: "Quel test évalue l'attention sélective ?", options: ["Test de Stroop", "Test du Trail Making (TMT)", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 0 },
+                    { question: "Quel est le rôle principal du cortex préfrontal dorsolatéral ?", options: ["Mémoire à long terme", "Fonctions exécutives", "Traitement visuel", "Régulation émotionnelle"], correct: 1 },
+                    { question: "Quel test évalue la planification ?", options: ["Test de Stroop", "Test de la Tour de Londres", "Test de fluence verbale", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel syndrome est caractérisé par une perte de la capacité à exécuter des mouvements appris ?", options: ["Agnosie", "Apraxie", "Aphasie", "Amnésie"], correct: 1 },
+                    { question: "Quel test évalue l'inhibition cognitive ?", options: ["Test de Stroop", "Test du Trail Making (TMT)", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 0 },
+                    { question: "Quel est le rôle du cortex cingulaire antérieur ?", options: ["Régulation des émotions et détection des conflits", "Contrôle moteur", "Mémoire à long terme", "Traitement du langage"], correct: 0 },
+                    { question: "Quel test évalue la vitesse de traitement de l'information ?", options: ["Test de Stroop", "Test du Trail Making (TMT)", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 1 },
+                    { question: "Quel est un symptôme courant d'une lésion du cortex préfrontal ?", options: ["Perte de mémoire", "Désinhibition", "Perte de vision", "Surdité"], correct: 1 },
+                    { question: "Quel test évalue la capacité à organiser des informations ?", options: ["Test de Stroop", "Test de la Tour de Londres", "Test de fluence verbale", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel est le rôle du cortex préfrontal ventromédian ?", options: ["Régulation des émotions", "Contrôle moteur", "Mémoire à long terme", "Traitement du langage"], correct: 0 },
+                    { question: "Quel test évalue la capacité à maintenir l'attention ?", options: ["Test de Stroop", "Test de vigilance (ex: Test de Bourdon)", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel est le rôle du cortex orbitofrontal ?", options: ["Prise de décision", "Contrôle moteur", "Mémoire à long terme", "Traitement du langage"], correct: 0 },
+                    { question: "Quel test évalue la capacité à résoudre des problèmes ?", options: ["Test de Stroop", "Test de la Tour de Londres", "Test de fluence verbale", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel est le rôle des ganglions de la base dans les fonctions exécutives ?", options: ["Régulation des émotions", "Contrôle des mouvements et des habitudes", "Mémoire à long terme", "Traitement du langage"], correct: 1 },
+                    { question: "Quel test évalue la capacité à générer des idées ?", options: ["Test de Stroop", "Test de fluence verbale", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel est le rôle du cortex préfrontal dans la prise de décision ?", options: ["Évaluation des risques et des récompenses", "Contrôle moteur", "Mémoire à long terme", "Traitement du langage"], correct: 0 },
+                    { question: "Quel test évalue la capacité à inhiber une réponse automatique ?", options: ["Test de Stroop", "Test du Trail Making (TMT)", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 0 },
+                    { question: "Quel est le rôle du cortex préfrontal dans la mémoire de travail ?", options: ["Stockage à long terme", "Manipulation active des informations", "Contrôle moteur", "Traitement du langage"], correct: 1 }
+                ],
+                attention: [
+                    { question: "Quel test évalue l'attention sélective ?", options: ["Test de Stroop", "Test du Trail Making (TMT)", "Test de la Tour de Londres", "Test de fluence verbale"], correct: 0 },
+                    { question: "Quel test évalue l'attention soutenue ?", options: ["Test de Stroop", "Test de vigilance (ex: Test de Bourdon)", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par une incapacité à maintenir l'attention ?", options: ["Aphasie", "TDAH", "Apraxie", "Agnosie"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation de l'attention ?", options: ["Dopamine", "Noradrénaline", "Sérotonine", "GABA"], correct: 1 },
+                    { question: "Quel test évalue l'attention divisée ?", options: ["Test de Stroop", "Test de double tâche", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel lobe cérébral est impliqué dans l'attention visuelle ?", options: ["Lobe frontal", "Lobe pariétal", "Lobe temporal", "Lobe occipital"], correct: 1 },
+                    { question: "Quel est le rôle du réseau du mode par défaut ?", options: ["Attention focalisée", "Rêverie et introspection", "Contrôle moteur", "Mémoire procédurale"], correct: 1 },
+                    { question: "Quel test évalue la capacité à ignorer les distractions ?", options: ["Test de Stroop", "Test de vigilance", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 0 },
+                    { question: "Quel trouble est caractérisé par une hyperactivité et une impulsivité ?", options: ["Schizophrénie", "Trouble bipolaire", "TDAH", "TOC"], correct: 2 },
+                    { question: "Quel est le rôle du colliculus supérieur dans l'attention ?", options: ["Orientation de l'attention visuelle", "Contrôle moteur", "Mémoire à long terme", "Traitement du langage"], correct: 0 },
+                    { question: "Quel test évalue la capacité à alterner l'attention entre deux tâches ?", options: ["Test de Stroop", "Test du Trail Making (TMT) partie B", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans l'attention sélective ?", options: ["Dopamine", "Acétylcholine", "Sérotonine", "GABA"], correct: 1 },
+                    { question: "Quel est le rôle du thalamus dans l'attention ?", options: ["Relais sensoriel", "Filtrage des informations sensorielles", "Contrôle moteur", "Mémoire à long terme"], correct: 1 },
+                    { question: "Quel test évalue la capacité à maintenir une attention soutenue sur une tâche monotone ?", options: ["Test de Stroop", "Test de vigilance continue", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel est le rôle du cortex préfrontal dans l'attention ?", options: ["Contrôle exécutif de l'attention", "Contrôle moteur", "Mémoire à long terme", "Traitement du langage"], correct: 0 },
+                    { question: "Quel trouble est associé à une distractibilité excessive ?", options: ["Schizophrénie", "TDAH", "Trouble bipolaire", "TOC"], correct: 1 },
+                    { question: "Quel est le rôle du lobe frontal dans l'attention ?", options: ["Contrôle exécutif", "Traitement sensoriel", "Mémoire à long terme", "Régulation émotionnelle"], correct: 0 },
+                    { question: "Quel test évalue la vitesse de traitement de l'information visuelle ?", options: ["Test de Stroop", "Test de temps de réaction", "Test de la Tour de Londres", "Test de Rey-Osterrieth"], correct: 1 },
+                    { question: "Quel est le rôle de la noradrénaline dans l'attention ?", options: ["Augmenter la vigilance", "Diminuer la vigilance", "Réguler le sommeil", "Contrôler la faim"], correct: 0 },
+                    { question: "Quel trouble est caractérisé par une difficulté à filtrer les stimuli non pertinents ?", options: ["TDAH", "Schizophrénie", "Trouble bipolaire", "TOC"], correct: 0 }
+                ],
+                pathologies: [
+                    { question: "La maladie d'Alzheimer est caractérisée par l'accumulation de quelle protéine ?", options: ["Alpha-synucléine", "Protéine Tau", "Bêta-amyloïde", "Prion"], correct: 2 },
+                    { question: "La maladie de Parkinson est principalement associée à la dégénérescence de quelles cellules ?", options: ["Cellules de Purkinje", "Neurones dopaminergiques de la substance noire", "Neurones cholinergiques", "Cellules gliales"], correct: 1 },
+                    { question: "La sclérose en plaques est une maladie qui affecte principalement :", options: ["Les neurones", "La myéline", "Les vaisseaux sanguins", "Les cellules gliales"], correct: 1 },
+                    { question: "La maladie de Huntington est causée par une mutation sur quel chromosome ?", options: ["Chromosome 4", "Chromosome 21", "Chromosome X", "Chromosome 1"], correct: 0 },
+                    { question: "Quel syndrome est associé à une carence en vitamine B1 ?", options: ["Syndrome de Korsakoff", "Syndrome de Guillain-Barré", "Syndrome de Tourette", "Syndrome de Down"], correct: 0 },
+                    { question: "La maladie de Creutzfeldt-Jakob est causée par :", options: ["Un virus", "Un prion", "Une bactérie", "Un champignon"], correct: 1 },
+                    { question: "Quel est le principal symptôme de la sclérose latérale amyotrophique (SLA) ?", options: ["Perte de mémoire", "Faiblesse musculaire progressive", "Troubles visuels", "Troubles auditifs"], correct: 1 },
+                    { question: "La maladie de Wilson est associée à une accumulation de quel métal ?", options: ["Fer", "Cuivre", "Zinc", "Aluminium"], correct: 1 },
+                    { question: "Quel est le principal marqueur biologique de la maladie d'Alzheimer dans le LCR ?", options: ["Protéine Tau totale", "Bêta-amyloïde 42", "Alpha-synucléine", "Protéine S100B"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par une négligence de l'espace controlatéral ?", options: ["Aphasie", "Syndrome de neglect spatial", "Apraxie", "Agnosie"], correct: 1 },
+                    { question: "Quelle maladie est associée à une dégénérescence des neurones moteurs ?", options: ["Maladie de Parkinson", "Sclérose latérale amyotrophique (SLA)", "Maladie d'Alzheimer", "Maladie de Huntington"], correct: 1 },
+                    { question: "Quel est le principal symptôme de la maladie de Parkinson ?", options: ["Perte de mémoire", "Tremblements au repos", "Troubles visuels", "Troubles auditifs"], correct: 1 },
+                    { question: "Quelle maladie est associée à une accumulation de protéine alpha-synucléine ?", options: ["Maladie d'Alzheimer", "Maladie de Parkinson", "Maladie de Huntington", "Sclérose en plaques"], correct: 1 },
+                    { question: "Quel syndrome est caractérisé par une incapacité à reconnaître les objets par le toucher ?", options: ["Agnosie visuelle", "Astéréognosie", "Apraxie", "Aphasie"], correct: 1 },
+                    { question: "Quelle maladie est associée à une démence rapide ?", options: ["Maladie d'Alzheimer", "Maladie de Creutzfeldt-Jakob", "Maladie de Parkinson", "Sclérose en plaques"], correct: 1 },
+                    { question: "Quel est le principal symptôme de la maladie de Huntington ?", options: ["Perte de mémoire", "Mouvements choréiques", "Troubles visuels", "Troubles auditifs"], correct: 1 },
+                    { question: "Quelle maladie est associée à une inflammation du système nerveux central ?", options: ["Maladie d'Alzheimer", "Sclérose en plaques", "Maladie de Parkinson", "Maladie de Huntington"], correct: 1 },
+                    { question: "Quel syndrome est caractérisé par une répétition involontaire de mots ou de phrases entendus ?", options: ["Écholalie", "Palilalie", "Coprolalie", "Aphasie"], correct: 0 },
+                    { question: "Quelle maladie est associée à une dégénérescence des neurones du cervelet ?", options: ["Maladie d'Alzheimer", "Ataxie cérébelleuse", "Maladie de Parkinson", "Maladie de Huntington"], correct: 1 },
+                    { question: "Quel est le principal symptôme de l'épilepsie ?", options: ["Tremblements", "Crises convulsives", "Perte de mémoire", "Troubles visuels"], correct: 1 }
+                ],
+                troubles_psychiatriques: [
+                    { question: "Quel trouble psychiatrique est associé à un excès de dopamine ?", options: ["Dépression", "Schizophrénie", "Trouble bipolaire", "TOC"], correct: 1 },
+                    { question: "Quel neurotransmetteur est principalement impliqué dans la dépression ?", options: ["Dopamine", "Sérotonine", "GABA", "Acétylcholine"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par des pensées intrusives et des comportements répétitifs ?", options: ["Schizophrénie", "Trouble bipolaire", "TOC", "Dépression"], correct: 2 },
+                    { question: "Quel trouble est associé à des épisodes maniaques et dépressifs ?", options: ["Schizophrénie", "Trouble bipolaire", "TOC", "Anxiété généralisée"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par une hyperactivité et des difficultés à maintenir l'attention ?", options: ["Schizophrénie", "Trouble bipolaire", "TDAH", "TOC"], correct: 2 },
+                    { question: "Quel neurotransmetteur est ciblé par les antidépresseurs tricycliques ?", options: ["Dopamine", "Sérotonine et noradrénaline", "GABA", "Acétylcholine"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par des hallucinations et des délires ?", options: ["Dépression", "Schizophrénie", "Trouble bipolaire", "TOC"], correct: 1 },
+                    { question: "Quel trouble est associé à une anxiété excessive et persistante ?", options: ["Dépression", "Trouble anxieux généralisé", "Trouble bipolaire", "TOC"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans le trouble panique ?", options: ["Dopamine", "GABA", "Sérotonine", "Noradrénaline"], correct: 3 },
+                    { question: "Quel trouble est caractérisé par une peur intense et irrationnelle d'un objet ou d'une situation ?", options: ["Trouble bipolaire", "Phobie spécifique", "TOC", "Dépression"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans le trouble de stress post-traumatique (TSPT) ?", options: ["Dopamine", "Noradrénaline", "Sérotonine", "GABA"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par une instabilité émotionnelle et des relations interpersonnelles chaotiques ?", options: ["Trouble bipolaire", "Trouble de la personnalité limite (borderline)", "TOC", "Schizophrénie"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans l'anxiété sociale ?", options: ["Dopamine", "Sérotonine", "GABA", "Glutamate"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par une méfiance excessive et une suspicion envers les autres ?", options: ["Trouble bipolaire", "Trouble de la personnalité paranoïaque", "TOC", "Dépression"], correct: 1 },
+                    { question: "Quel trouble est associé à des épisodes de dépersonnalisation ?", options: ["Trouble bipolaire", "Trouble de stress post-traumatique", "TOC", "Schizophrénie"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation de l'humeur dans le trouble bipolaire ?", options: ["Dopamine", "Sérotonine", "GABA", "Noradrénaline"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par des comportements impulsifs et une instabilité émotionnelle ?", options: ["Trouble bipolaire", "Trouble de la personnalité limite", "TOC", "Schizophrénie"], correct: 1 },
+                    { question: "Quel trouble est associé à une altération de la perception de la réalité ?", options: ["Dépression", "Schizophrénie", "Trouble bipolaire", "TOC"], correct: 1 },
+                    { question: "Quel neurotransmetteur est impliqué dans la régulation du sommeil dans la dépression ?", options: ["Dopamine", "Sérotonine", "GABA", "Noradrénaline"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par une obsession des symétries et des rituels ?", options: ["Trouble bipolaire", "TOC", "Schizophrénie", "Dépression"], correct: 1 }
+                ],
+                neurodeveloppement: [
+                    { question: "Quel trouble du neurodéveloppement est caractérisé par des difficultés sociales et des comportements répétitifs ?", options: ["TDAH", "Autisme", "Dyslexie", "Dyspraxie"], correct: 1 },
+                    { question: "Quel trouble est associé à des difficultés de lecture et d'orthographe ?", options: ["TDAH", "Autisme", "Dyslexie", "Dyspraxie"], correct: 2 },
+                    { question: "Quel trouble est caractérisé par des difficultés de coordination motrice ?", options: ["TDAH", "Autisme", "Dyslexie", "Dyspraxie"], correct: 3 },
+                    { question: "Quel trouble du neurodéveloppement est souvent associé à une hyperactivité ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par des difficultés à comprendre les émotions des autres ?", options: ["TDAH", "Autisme", "Dyslexie", "Dyspraxie"], correct: 1 },
+                    { question: "Quel trouble est associé à des difficultés d'attention et d'impulsivité ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par des difficultés à écrire de manière lisible ?", options: ["Autisme", "TDAH", "Dysgraphie", "Dyspraxie"], correct: 2 },
+                    { question: "Quel trouble est caractérisé par des difficultés à comprendre les expressions faciales ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 0 },
+                    { question: "Quel trouble est associé à des difficultés à suivre des instructions complexes ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par des difficultés à organiser des tâches ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 1 },
+                    { question: "Quel trouble est associé à des difficultés de planification ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 1 },
+                    { question: "Quel trouble est caractérisé par une hypersensibilité sensorielle ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 0 },
+                    { question: "Quel trouble est associé à des difficultés de communication non verbale ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 0 },
+                    { question: "Quel trouble est caractérisé par des intérêts très spécifiques et répétitifs ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 0 },
+                    { question: "Quel trouble est associé à des difficultés de motricité fine ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 3 },
+                    { question: "Quel trouble est caractérisé par des difficultés à adapter son comportement ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 0 },
+                    { question: "Quel trouble est associé à des retards de langage ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 0 },
+                    { question: "Quel trouble est caractérisé par des difficultés à imiter les gestes ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 3 },
+                    { question: "Quel trouble est associé à des difficultés de coordination œil-main ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 3 },
+                    { question: "Quel trouble est caractérisé par une difficulté à comprendre les métaphores ?", options: ["Autisme", "TDAH", "Dyslexie", "Dyspraxie"], correct: 0 }
+                ],
+                neuroimagerie: [
+                    { question: "Quelle technique d'imagerie cérébrale utilise des champs magnétiques ?", options: ["TDM (Tomodensitométrie)", "IRM (Imagerie par Résonance Magnétique)", "TEP (Tomographie par Émission de Positrons)", "EEG (Électroencéphalographie)"], correct: 1 },
+                    { question: "Quelle technique d'imagerie cérébrale mesure l'activité métabolique ?", options: ["TDM", "IRM", "TEP", "EEG"], correct: 2 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour détecter les anomalies structurelles ?", options: ["EEG", "IRM", "TEP", "TDM"], correct: 3 },
+                    { question: "Quelle technique d'imagerie cérébrale mesure l'activité électrique du cerveau ?", options: ["IRM", "TEP", "EEG", "TDM"], correct: 2 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier la connectivité fonctionnelle ?", options: ["IRM fonctionnelle (IRMf)", "TDM", "TEP", "EEG"], correct: 0 },
+                    { question: "Quelle technique d'imagerie cérébrale utilise des traceurs radioactifs ?", options: ["IRM", "TEP", "EEG", "TDM"], correct: 1 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les vaisseaux sanguins ?", options: ["IRM", "Angiographie", "TEP", "EEG"], correct: 1 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour détecter les lésions cérébrales aiguës ?", options: ["IRM", "TDM", "TEP", "EEG"], correct: 1 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier la perfusion cérébrale ?", options: ["IRM", "TEP", "SPECT", "EEG"], correct: 2 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier l'activité cérébrale en temps réel ?", options: ["IRMf", "TDM", "TEP", "EEG"], correct: 0 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les lésions de la substance blanche ?", options: ["IRM", "TDM", "TEP", "EEG"], correct: 0 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les crises d'épilepsie ?", options: ["IRM", "TDM", "EEG", "TEP"], correct: 2 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier le métabolisme du glucose ?", options: ["IRM", "TEP", "EEG", "TDM"], correct: 1 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les lésions vasculaires ?", options: ["IRM", "Angiographie par IRM", "TEP", "EEG"], correct: 1 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les lésions de la moelle épinière ?", options: ["IRM", "TDM", "TEP", "EEG"], correct: 0 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les lésions des nerfs périphériques ?", options: ["IRM", "TDM", "Électromyographie", "EEG"], correct: 2 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les lésions du tronc cérébral ?", options: ["IRM", "TDM", "TEP", "EEG"], correct: 0 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les lésions des ganglions de la base ?", options: ["IRM", "TDM", "TEP", "EEG"], correct: 0 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les lésions du cortex cérébral ?", options: ["IRM", "TDM", "TEP", "EEG"], correct: 0 },
+                    { question: "Quelle technique d'imagerie cérébrale est utilisée pour étudier les lésions du cervelet ?", options: ["IRM", "TDM", "TEP", "EEG"], correct: 0 }
+                ]
+            };
+
+            // Fusionner toutes les questions dans un seul tableau
+            const allQuestions = [];
+            for (const category in categories) {
+                allQuestions.push(...categories[category].map(q => ({ ...q, category })));
+            }
+            return allQuestions;
+        }
+
+        // Variables
+        let quizData = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+        let isDailyMode = false;
+        let selectedCategories = ["all"];
+
+        // Éléments DOM
+        const questionEl = document.getElementById("question");
+        const optionsEl = document.getElementById("options");
+        const prevBtn = document.getElementById("prev-btn");
+        const nextBtn = document.getElementById("next-btn");
+        const scoreContainerEl = document.getElementById("score-container");
+        const scoreEl = document.getElementById("score");
+        const scoreMaxEl = document.getElementById("score-max");
+        const scoreMessageEl = document.getElementById("score-message");
+        const restartBtn = document.getElementById("restart-btn");
+        const fullModeBtn = document.getElementById("full-mode-btn");
+        const dailyModeBtn = document.getElementById("daily-mode-btn");
+        const categoryBtn = document.getElementById("category-btn");
+        const categoryDropdown = document.getElementById("category-dropdown");
+        const validateCategoriesBtn = document.getElementById("validate-categories");
+        const selectedCategoriesEl = document.getElementById("selected-categories");
+        const dailyInfoEl = document.getElementById("daily-info");
+
+        // Initialiser les questions
+        const allQuestions = generateQuestions();
+
+        // Initialisation du quiz
+        function initQuiz() {
+            if (isDailyMode) {
+                // Mode quotidien : 10 questions aléatoires
+                const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+                quizData = shuffled.slice(0, 10);
+                dailyInfoEl.style.display = "block";
+            } else {
+                // Mode complet ou sélection de catégories
+                if (selectedCategories.includes("all")) {
+                    quizData = [...allQuestions];
+                } else {
+                    quizData = allQuestions.filter(q => selectedCategories.includes(q.category));
+                }
+                dailyInfoEl.style.display = "none";
+            }
+
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = Array(quizData.length).fill(null);
+            loadQuestion();
+            updateUI();
+        }
+
+        // Charger une question
+        function loadQuestion() {
+            if (quizData.length === 0) {
+                questionEl.textContent = "Aucune question disponible pour les catégories sélectionnées.";
+                optionsEl.innerHTML = "";
+                return;
+            }
+
+            const question = quizData[currentQuestion];
+            questionEl.textContent = question.question;
+
+            optionsEl.innerHTML = "";
+            question.options.forEach((option, index) => {
+                const optionEl = document.createElement("div");
+                optionEl.classList.add("option");
+                optionEl.textContent = option;
+                optionEl.addEventListener("click", () => selectOption(index));
+                if (userAnswers[currentQuestion] === index) {
+                    optionEl.classList.add("selected");
+                }
+                optionsEl.appendChild(optionEl);
+            });
+
+            updateUI();
+        }
+
+        // Sélectionner une option
+        function selectOption(index) {
+            if (userAnswers[currentQuestion] !== null) return;
+
+            userAnswers[currentQuestion] = index;
+            const question = quizData[currentQuestion];
+
+            // Mettre à jour les options
+            const options = optionsEl.querySelectorAll(".option");
+            options.forEach((option, i) => {
+                option.classList.remove("selected", "correct", "incorrect");
+                if (i === index) {
+                    option.classList.add("selected");
+                    if (i === question.correct) {
+                        option.classList.add("correct");
+                        score++;
+                    } else {
+                        option.classList.add("incorrect");
+                    }
+                }
+            });
+
+            updateUI();
+        }
+
+        // Mettre à jour l'UI
+        function updateUI() {
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.textContent = currentQuestion < quizData.length - 1 ? "Suivant" : "Terminer";
+            scoreMaxEl.textContent = quizData.length;
+
+            if (currentQuestion === quizData.length - 1 && userAnswers[currentQuestion] !== null) {
+                nextBtn.onclick = showScore;
+            } else {
+                nextBtn.onclick = nextQuestion;
+            }
+        }
+
+        // Question suivante
+        function nextQuestion() {
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            }
+        }
+
+        // Question précédente
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        // Afficher le score
+        function showScore() {
+            scoreContainerEl.style.display = "block";
+            scoreEl.textContent = score;
+
+            const percentage = (score / quizData.length) * 100;
+            if (percentage === 100) {
+                scoreMessageEl.textContent = "🏆 Parfait ! Tu es un expert !";
+            } else if (percentage >= 80) {
+                scoreMessageEl.textContent = "⭐ Excellent travail !";
+            } else if (percentage >= 50) {
+                scoreMessageEl.textContent = "👍 Bien joué !";
+            } else {
+                scoreMessageEl.textContent = "📖 Relis tes cours !";
+            }
+
+            restartBtn.style.display = "block";
+            nextBtn.style.display = "none";
+            prevBtn.style.display = "none";
+        }
+
+        // Changer de mode
+        function setMode(daily) {
+            isDailyMode = daily;
+            fullModeBtn.classList.toggle("active", !daily);
+            dailyModeBtn.classList.toggle("active", daily);
+
+            // Réinitialiser les catégories si on passe en mode quotidien
+            if (daily) {
+                selectedCategories = ["all"];
+                document.getElementById("all").checked = true;
+                categoryDropdown.querySelectorAll('input[type="checkbox"]:not(#all)').forEach(cb => {
+                    cb.checked = false;
+                });
+                selectedCategoriesEl.classList.remove("show");
+                fullModeBtn.textContent = "Quiz complet";
+            }
+
+            initQuiz();
+        }
+
+        // Gérer le dropdown des catégories
+        function toggleDropdown() {
+            categoryDropdown.classList.toggle("show");
+        }
+
+        // Valider les catégories sélectionnées
+        function validateCategories() {
+            const checkboxes = categoryDropdown.querySelectorAll("input[type='checkbox']");
+            selectedCategories = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selectedCategories.push(cb.id);
+                }
+            });
+
+            // Mettre à jour l'affichage
+            selectedCategoriesEl.innerHTML = "<span>Sélection : </span>";
+            if (selectedCategories.includes("all")) {
+                selectedCategoriesEl.innerHTML += "<span class='category-tag'>Toutes</span>";
+                fullModeBtn.textContent = "Quiz complet";
+            } else {
+                const categoryNames = {
+                    neuroanatomie: "Neuroanatomie",
+                    neurotransmetteurs: "Neurotransmetteurs",
+                    memoire: "Mémoire",
+                    langage: "Langage",
+                    fonctions_executives: "Fonctions exécutives",
+                    attention: "Attention",
+                    pathologies: "Pathologies",
+                    troubles_psychiatriques: "Troubles psychiatriques",
+                    neurodeveloppement: "Neurodéveloppement",
+                    neuroimagerie: "Neuroimagerie"
+                };
+                selectedCategories.forEach(cat => {
+                    selectedCategoriesEl.innerHTML += `<span class='category-tag'>${categoryNames[cat] || cat}</span>`;
+                });
+                fullModeBtn.textContent = "Quiz sélection";
+            }
+            selectedCategoriesEl.classList.add("show");
+            categoryDropdown.classList.remove("show");
+            initQuiz();
+        }
+
+        // Fermer le dropdown si on clique à l'extérieur
+        document.addEventListener("click", (e) => {
+            if (!categoryBtn.contains(e.target) && !categoryDropdown.contains(e.target)) {
+                categoryDropdown.classList.remove("show");
+            }
+        });
+
+        // Gérer les checkboxes (désactiver "Toutes" si une autre case est cochée)
+        categoryDropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener("change", function() {
+                if (this.id === "all" && this.checked) {
+                    categoryDropdown.querySelectorAll('input[type="checkbox"]:not(#all)').forEach(otherCb => {
+                        otherCb.checked = false;
+                    });
+                } else if (this.checked) {
+                    document.getElementById("all").checked = false;
+                }
+            });
+        });
+
+        // Événements
+        fullModeBtn.addEventListener("click", () => setMode(false));
+        dailyModeBtn.addEventListener("click", () => setMode(true));
+        categoryBtn.addEventListener("click", toggleDropdown);
+        validateCategoriesBtn.addEventListener("click", validateCategories);
+        prevBtn.addEventListener("click", prevQuestion);
+        restartBtn.addEventListener("click", initQuiz);
+
+        // Initialiser
+        initQuiz();
+    </script>
+</body>
+</html>
