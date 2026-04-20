@@ -1,0 +1,20 @@
+{
+  "name": "Quiz Neuropsychologie",
+  "short_name": "NeuroQuiz",
+  "description": "300 questions de neuropsychologie niveau Master — P'tite Crevette",
+  "start_url": "/Quiz-Neuropsychologie/",
+  "scope": "/Quiz-Neuropsychologie/",
+  "display": "standalone",
+  "background_color": "#FF6B6B",
+  "theme_color": "#FF6B6B",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF6B6B'/%3E%3Ccircle cx='50' cy='30' r='13' fill='white'/%3E%3Ccircle cx='25' cy='52' r='10' fill='white'/%3E%3Ccircle cx='75' cy='52' r='10' fill='white'/%3E%3Ccircle cx='35' cy='76' r='10' fill='white'/%3E%3Ccircle cx='65' cy='76' r='10' fill='white'/%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
